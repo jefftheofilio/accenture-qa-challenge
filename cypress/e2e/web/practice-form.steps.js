@@ -1,7 +1,10 @@
-import { Given, When, Then, Before } from '@badeball/cypress-cucumber-preprocessor';
-import homePage from '../../support/pages/home.page';
+import { When, Then, Before } from '@badeball/cypress-cucumber-preprocessor';
 import practiceFormPage from '../../support/pages/practice-form.page';
 import { buildFormData } from '../../support/factories/form.factory';
+
+/**
+ * Os steps de navegacao ficam em common/navigation.steps.js.
+ */
 
 let dados = {};
 
@@ -9,18 +12,7 @@ Before(() => {
   dados = {};
 });
 
-Given('que eu acesse a página inicial do DemoQA', () => {
-  homePage.visitar();
-  cy.url().should('include', 'demoqa.com');
-});
-
-When('eu escolher a opção {string} no menu principal', (card) => {
-  homePage.escolherCard(card);
-  cy.url().should('include', '/forms');
-});
-
-When('eu clicar no submenu {string}', (submenu) => {
-  homePage.escolherSubmenu(submenu);
+When('eu confirmar que estou na página do Practice Form', () => {
   cy.url().should('include', '/automation-practice-form');
   practiceFormPage.removerAnuncios();
 });

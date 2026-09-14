@@ -11,6 +11,7 @@ Funcionalidade: Preenchimento e submissão do Practice Form
     Dado que eu acesse a página inicial do DemoQA
     Quando eu escolher a opção "Forms" no menu principal
     E eu clicar no submenu "Practice Form"
+    E eu confirmar que estou na página do Practice Form
     E eu preencher todos os campos do formulário com dados aleatórios
     E eu anexar um arquivo de texto no campo de upload
     E eu submeter o formulário
