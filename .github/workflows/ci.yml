@@ -1,0 +1,48 @@
+name: CI - Testes Automatizados
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  api-tests:
+    name: Testes de API
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout do código
+        uses: actions/checkout@v4
+
+      - name: Configura Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'npm'
+
+      - name: Instala dependências
+        run: npm ci
+
+      - name: Executa a suíte de API
+        uses: cypress-io/github-action@v6
+        with:
+          spec: cypress/e2e/api/**/*.feature
+          browser: chrome
+
+      - name: Publica o relatório
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: cucumber-report
+          path: reports/
+          retention-days: 7
+
+      - name: Publica screenshots das falhas
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: screenshots
+          path: cypress/screenshots/
+          retention-days: 7
