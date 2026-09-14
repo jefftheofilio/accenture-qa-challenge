@@ -9,7 +9,7 @@ on:
 
 jobs:
   api-tests:
-    name: Testes de API
+    name: Testes Automatizados
     runs-on: ubuntu-latest
 
     steps:
@@ -25,10 +25,10 @@ jobs:
       - name: Instala dependências
         run: npm ci
 
-      - name: Executa a suíte de API
+      - name: Executa a suíte completa
         uses: cypress-io/github-action@v6
         with:
-          spec: cypress/e2e/api/**/*.feature
+          spec: cypress/e2e/**/*.feature
           browser: chrome
 
       - name: Publica o relatório
