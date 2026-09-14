@@ -69,6 +69,26 @@ Relatório HTML gerado em `reports/cucumber-report.html`.
 
 **Asserts com mensagem descritiva.** Cada `expect` carrega um rótulo (`'status da criação do usuário'`). Na falha, a mensagem diz o que estava sendo verificado, sem exigir leitura do código.
 
+## Defeitos identificados na aplicação
+
+Durante a automação foi identificado um defeito na aplicação sob teste, reproduzido também em navegação manual.
+
+**Botão "Close" do modal de confirmação não fecha o popup**
+
+| | |
+|---|---|
+| **Onde** | `https://demoqa.com/automation-practice-form` — modal exibido após o submit |
+| **Passos** | Preencher o formulário, submeter, clicar no botão "Close" |
+| **Esperado** | O modal é fechado |
+| **Obtido** | O modal permanece aberto |
+| **Erro no console** | `TypeError: Lr.findDOMNode is not a function` |
+| **Reprodução manual** | Sim — não é limitação da automação |
+| **Contorno** | A tecla `Esc` fecha o modal normalmente |
+
+**Causa provável.** O DemoQA foi migrado para React 19, que removeu a API `findDOMNode`. Componentes legados do site ainda a invocam durante o desmonte do modal, e a exceção interrompe o processo. A tecla `Esc` funciona porque o Bootstrap trata esse evento por um caminho que não passa pelo componente afetado.
+
+**Decisão de automação.** O cenário mantém o clique no botão — é a ação esperada do usuário e o passo exigido pelo desafio — e usa `Esc` como fallback para concluir o fluxo, registrando o defeito no log da execução. Mascarar o assert para o teste passar esconderia um problema real da aplicação.
+
 ## Autor
 
 Jeff Theofilio
