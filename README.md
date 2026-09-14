@@ -1,5 +1,6 @@
 # Desafio QA Automation — Accenture
 
+![CI](https://github.com/jefftheofilio/accenture-qa-challenge/actions/workflows/ci.yml/badge.svg)
 Automação de testes do fluxo de **BookStore API** do [DemoQA](https://demoqa.com/swagger/), implementada em Cypress com Cucumber (BDD).
 
 O cenário executa os seis passos do desafio de forma **contínua, em uma única execução**, sem intervenção manual entre eles.
