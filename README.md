@@ -5,7 +5,7 @@
 Automação de testes das duas partes do desafio, implementada em Cypress com Cucumber (BDD):
 
 - **Parte 1 — API:** fluxo completo da [BookStore API](https://demoqa.com/swagger/) do DemoQA, com os seis passos do enunciado executados de forma **contínua em uma única execução**.
-- **Parte 2 — Front-end:** preenchimento e submissão do Practice Form, e abertura de nova janela pela página Browser Windows.
+- **Parte 2 — Front-end:** Practice Form, abertura de nova janela e CRUD na Web Tables, incluindo o cenário bônus de criação e exclusão dinâmica em lote.
 
 ## Stack
 
@@ -78,6 +78,17 @@ Relatório HTML gerado em `reports/cucumber-report.html`.
 | 6 | Validar a mensagem exibida | Texto "This is a sample page" |
 | 7 | Fechar a nova janela | Retorno à página Browser Windows |
 
+## Parte 2 — Web Tables (CRUD)
+
+| # | Passo | Validação |
+|---|---|---|
+| 1 | Acessar a home e navegar até Web Tables | URL `/webtables` |
+| 2 | Criar um registro com dados aleatórios | Registro presente na tabela com todos os campos |
+| 3 | Editar o registro criado | Dados atualizados refletidos na tabela |
+| 4 | Excluir o registro | Registro ausente da tabela |
+| 5 | **Bônus:** criar 12 registros dinamicamente | Quantidade parametrizada no Gherkin via `{int}` |
+| 6 | **Bônus:** excluir todos os registros criados | Nenhum dos 12 permanece; registros originais preservados |
+
 ## Estrutura
 
 ```
@@ -92,7 +103,9 @@ cypress/
 │       ├── practice-form.feature
 │       ├── practice-form.steps.js
 │       ├── browser-windows.feature
-│       └── browser-windows.steps.js
+│       ├── browser-windows.steps.js
+│       ├── web-tables.feature
+│       └── web-tables.steps.js
 ├── fixtures/
 │   └── upload-teste.txt                # arquivo usado no campo de upload
 └── support/
@@ -103,11 +116,13 @@ cypress/
     │   └── environment.js              # ponto único de configuração
     ├── factories/                      # geração de massa de teste
     │   ├── user.factory.js
-    │   └── form.factory.js
+    │   ├── form.factory.js
+    │   └── record.factory.js
     ├── pages/                          # Page Objects
     │   ├── home.page.js
     │   ├── practice-form.page.js
-    │   └── browser-windows.page.js
+    │   ├── browser-windows.page.js
+    │   └── web-tables.page.js
     └── e2e.js
 ```
 
@@ -128,6 +143,12 @@ cypress/
 **Limpeza no hook `After`.** Os livros e o usuário criados são removidos ao final. O ambiente volta ao estado original, sem acúmulo de massa órfã entre execuções.
 
 **Nova janela validada por interceptação de `window.open`.** O Cypress executa dentro de uma única aba e não controla janelas abertas pela aplicação — não existe equivalente ao `switchTo().window()` do Selenium. O cenário substitui `window.open` por um stub, valida que a aplicação solicitou a abertura com a URL e o target corretos, e então navega até esse endereço para verificar o conteúdo. O comportamento é testado integralmente, sem depender de um recurso que o framework não oferece.
+
+**Volume parametrizado no Gherkin.** O cenário bônus usa `{int}` para a quantidade de registros: alterar `12` para outro valor na feature muda o volume de massa sem tocar em uma linha de step definition. A regra de negócio fica declarada no cenário, não escondida no código.
+
+**Paginação ampliada em vez de filtro por busca.** O campo de busca da Web Tables é um input controlado que re-renderiza a listagem a cada tecla e não sincroniza de forma confiável com a automação — caracteres se perdem e o filtro fica truncado. A suíte amplia a paginação para 50 linhas e verifica diretamente o corpo da tabela. Além de estável, elimina 24 digitações longas por execução: o cenário bônus caiu de 3m41s para 18s.
+
+**Exclusão idempotente.** O método de remoção verifica a presença do registro antes de clicar. Durante uma exclusão em lote, a re-renderização da tabela pode antecipar a remoção de uma linha, e a verificação prévia evita uma falha por condição de corrida sem mascarar o resultado final, que continua sendo assertado.
 
 **Remoção de banners em vez de `{ force: true }`.** O DemoQA exibe um banner fixo e um rodapé que interceptam o clique no botão de submit. Os elementos são removidos do DOM antes da interação, de modo que o clique continue sendo um clique real de usuário — uma eventual regressão de sobreposição na própria aplicação ainda seria detectada.
 
