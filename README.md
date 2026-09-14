@@ -5,7 +5,7 @@
 Automação de testes das duas partes do desafio, implementada em Cypress com Cucumber (BDD):
 
 - **Parte 1 — API:** fluxo completo da [BookStore API](https://demoqa.com/swagger/) do DemoQA, com os seis passos do enunciado executados de forma **contínua em uma única execução**.
-- **Parte 2 — Front-end:** Practice Form, abertura de nova janela e CRUD na Web Tables, incluindo o cenário bônus de criação e exclusão dinâmica em lote.
+- **Parte 2 — Front-end:** Practice Form, abertura de nova janela, CRUD na Web Tables (com o cenário bônus de criação e exclusão dinâmica em lote) e controle da Progress Bar.
 
 ## Stack
 
@@ -89,6 +89,17 @@ Relatório HTML gerado em `reports/cucumber-report.html`.
 | 5 | **Bônus:** criar 12 registros dinamicamente | Quantidade parametrizada no Gherkin via `{int}` |
 | 6 | **Bônus:** excluir todos os registros criados | Nenhum dos 12 permanece; registros originais preservados |
 
+## Parte 2 — Progress Bar
+
+| # | Passo | Validação |
+|---|---|---|
+| 1 | Acessar a home e navegar até Progress Bar | URL `/progress-bar` |
+| 2 | Iniciar a barra | — |
+| 3 | Pausar antes do limite | Espera pela condição no `aria-valuenow`, não por tempo fixo |
+| 4 | Validar o progresso | Valor ≤ 25% e barra efetivamente parada (duas leituras iguais) |
+| 5 | Retomar até 100% | `aria-valuenow` igual a 100 e classe `bg-success` |
+| 6 | Resetar a barra | Botão volta a "Start", Reset some, preenchimento removido |
+
 ## Estrutura
 
 ```
@@ -105,7 +116,9 @@ cypress/
 │       ├── browser-windows.feature
 │       ├── browser-windows.steps.js
 │       ├── web-tables.feature
-│       └── web-tables.steps.js
+│       ├── web-tables.steps.js
+│       ├── progress-bar.feature
+│       └── progress-bar.steps.js
 ├── fixtures/
 │   └── upload-teste.txt                # arquivo usado no campo de upload
 └── support/
@@ -122,7 +135,8 @@ cypress/
     │   ├── home.page.js
     │   ├── practice-form.page.js
     │   ├── browser-windows.page.js
-    │   └── web-tables.page.js
+    │   ├── web-tables.page.js
+    │   └── progress-bar.page.js
     └── e2e.js
 ```
 
@@ -143,6 +157,10 @@ cypress/
 **Limpeza no hook `After`.** Os livros e o usuário criados são removidos ao final. O ambiente volta ao estado original, sem acúmulo de massa órfã entre execuções.
 
 **Nova janela validada por interceptação de `window.open`.** O Cypress executa dentro de uma única aba e não controla janelas abertas pela aplicação — não existe equivalente ao `switchTo().window()` do Selenium. O cenário substitui `window.open` por um stub, valida que a aplicação solicitou a abertura com a URL e o target corretos, e então navega até esse endereço para verificar o conteúdo. O comportamento é testado integralmente, sem depender de um recurso que o framework não oferece.
+
+**Espera por condição em vez de tempo fixo.** O requisito de pausar a barra antes dos 25% seria frágil com `cy.wait` de duração fixa: a velocidade da animação varia entre máquinas e no CI. A suíte aguarda o `aria-valuenow` cruzar um limiar de 15% e só então clica, com margem deliberada para absorver o intervalo entre a leitura e o efeito do clique. Em teste manual, o mesmo gesto parou em 28% — acima do limite —, o que ilustra por que a margem existe.
+
+**Estado validado pelo atributo semântico.** O progresso é lido de `aria-valuenow`, não do texto exibido: o atributo é a fonte semântica do componente e independe de formatação. A parada é confirmada com duas leituras em instantes distintos, provando que a barra está de fato pausada e não apenas lenta.
 
 **Volume parametrizado no Gherkin.** O cenário bônus usa `{int}` para a quantidade de registros: alterar `12` para outro valor na feature muda o volume de massa sem tocar em uma linha de step definition. A regra de negócio fica declarada no cenário, não escondida no código.
 
