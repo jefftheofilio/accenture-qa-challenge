@@ -5,7 +5,7 @@
 Automação de testes das duas partes do desafio, implementada em Cypress com Cucumber (BDD):
 
 - **Parte 1 — API:** fluxo completo da [BookStore API](https://demoqa.com/swagger/) do DemoQA, com os seis passos do enunciado executados de forma **contínua em uma única execução**.
-- **Parte 2 — Front-end:** Practice Form, abertura de nova janela, CRUD na Web Tables (com o cenário bônus de criação e exclusão dinâmica em lote) e controle da Progress Bar.
+- **Parte 2 — Front-end:** Practice Form, abertura de nova janela, CRUD na Web Tables (com o cenário bônus de criação e exclusão dinâmica em lote), controle da Progress Bar e ordenação por drag and drop.
 
 ## Stack
 
@@ -100,6 +100,17 @@ Relatório HTML gerado em `reports/cucumber-report.html`.
 | 5 | Retomar até 100% | `aria-valuenow` igual a 100 e classe `bg-success` |
 | 6 | Resetar a barra | Botão volta a "Start", Reset some, preenchimento removido |
 
+## Parte 2 — Sortable (drag and drop)
+
+Cenários implementados, porém **desabilitados** por limitação do framework — ver a seção de limitações abaixo.
+
+| # | Passo | Validação |
+|---|---|---|
+| 1 | Acessar a home e navegar até Sortable | URL `/sortable` |
+| 2 | Embaralhar a coleção | Ordem diferente da inicial |
+| 3 | Ordenar por drag and drop | Sequência crescente completa |
+| 4 | Repetir nas abas List e Grid | Escopo isolado por painel |
+
 ## Estrutura
 
 ```
@@ -118,7 +129,9 @@ cypress/
 │       ├── web-tables.feature
 │       ├── web-tables.steps.js
 │       ├── progress-bar.feature
-│       └── progress-bar.steps.js
+│       ├── progress-bar.steps.js
+│       ├── sortable.feature
+│       └── sortable.steps.js
 ├── fixtures/
 │   └── upload-teste.txt                # arquivo usado no campo de upload
 └── support/
@@ -136,7 +149,8 @@ cypress/
     │   ├── practice-form.page.js
     │   ├── browser-windows.page.js
     │   ├── web-tables.page.js
-    │   └── progress-bar.page.js
+    │   ├── progress-bar.page.js
+    │   └── sortable.page.js
     └── e2e.js
 ```
 
@@ -175,6 +189,27 @@ cypress/
 **`retries: { runMode: 1 }`.** O DemoQA é um ambiente público e instável, com 502/503 intermitentes. Uma retentativa em modo headless separa falha real de indisponibilidade de ambiente. Em modo interativo os retries ficam desligados, para não mascarar erro durante o desenvolvimento.
 
 **Asserts com mensagem descritiva.** Cada `expect` carrega um rótulo (`'status da criação do usuário'`). Na falha, a mensagem diz o que estava sendo verificado, sem exigir leitura do código.
+
+## Limitações identificadas
+
+**Drag and drop no componente Sortable não é automatizável com Cypress**
+
+O componente usa react-dnd com backend HTML5, que depende do motor de drag nativo do navegador. Esse motor só é acionado por gesto real de ponteiro: eventos sintéticos disparados via JavaScript não carregam a flag `isTrusted` e são descartados.
+
+Quatro abordagens foram testadas, no Electron e no Chrome:
+
+| Abordagem | Resultado |
+|---|---|
+| `dragover` em sequência sobre itens intermediários | Sem efeito |
+| `dragenter` antes do `dragover` | Sem efeito |
+| Eventos de mouse (`mousedown` / `mousemove` / `mouseup`) | Sem efeito |
+| `dragover` com coordenadas explícitas do alvo | Sem efeito |
+
+Em todas, a ordem permaneceu `One, Two, Three, Four, Five, Six`.
+
+**Decisão.** Os cenários permanecem no repositório, marcados com `@skip` e excluídos da execução pelo filtro de tags, como registro da análise. Manipular o DOM diretamente para reordenar os elementos faria o teste passar sem que nenhum arraste ocorresse — um falso positivo que esconderia a limitação em vez de reportá-la.
+
+Ferramentas que operam via CDP ou WebDriver, como Playwright e Selenium, não têm essa restrição e seriam a escolha adequada para cobrir esse fluxo.
 
 ## Defeitos identificados na aplicação
 

@@ -6,6 +6,13 @@ const createEsbuildPlugin = require('@badeball/cypress-cucumber-preprocessor/esb
 async function setupNodeEvents(on, config) {
   await preprocessor.addCucumberPreprocessorPlugin(on, config);
 
+  on('task', {
+    log(mensagem) {
+      console.log(mensagem);
+      return null;
+    },
+  });
+
   on(
     'file:preprocessor',
     createBundler({

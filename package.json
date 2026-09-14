@@ -4,9 +4,9 @@
   "description": "Desafio de QA Automation - Accenture | API + Web",
   "scripts": {
     "cy:open": "cypress open",
-    "test": "cypress run",
-    "test:api": "cypress run --spec 'cypress/e2e/api/**/*.feature'",
-    "test:web": "cypress run --spec 'cypress/e2e/web/**/*.feature'"
+    "test": "cypress run --env tags='not @skip'",
+    "test:api": "cypress run --spec 'cypress/e2e/api/**/*.feature' --env tags='not @skip'",
+    "test:web": "cypress run --spec 'cypress/e2e/web/**/*.feature' --env tags='not @skip'"
   },
   "repository": {
     "type": "git",
@@ -41,6 +41,8 @@
     "html": {
       "enabled": true,
       "output": "reports/cucumber-report.html"
-    }
+    },
+    "filterSpecs": true,
+    "omitFiltered": true
   }
 }
