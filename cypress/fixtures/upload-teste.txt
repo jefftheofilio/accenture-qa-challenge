@@ -1,0 +1,2 @@
+Arquivo de evidencia para o desafio de QA Automation - Accenture.
+Utilizado no campo Select Picture do Practice Form.
